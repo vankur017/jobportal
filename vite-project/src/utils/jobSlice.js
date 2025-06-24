@@ -2,29 +2,44 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const jobSlice = createSlice({
   name: "job",
-    initialState: {
-        jobs: [],
-        isLoading: false,
-        error: null,
+  initialState: {
+    jobs: [],        // filtered or displayed jobs
+    allJobs: [],     // original list fetched from API
+    isLoading: false,
+    selectedJob: null,
+    error: null,
+  },
+  reducers: {
+    addAllJobs: (state, action) => {
+      state.allJobs = action.payload;  // store all jobs
+      state.jobs = action.payload;     // also initialize jobs with the full list
     },
-    reducers: {
-        addAllJobs: (state, action) => {
-            state.jobs = action.payload;
-        },
-        addFilteredJobs: (state, action) => {
-            state.jobs = action.payload;
-        },
-        removeJobs: (state) => {
-            state.jobs = '';
-        },
-        setLoading: (state, action) => {
-            state.isLoading = action.payload;
-        },
-        setError: (state, action) => {
-            state.error = action.payload;
-        },
+    addFilteredJobs: (state, action) => {
+      state.jobs = action.payload;     // update only the filtered view
     },
-})
+    setSelectedJob: (state, action) => {
+      state.jobs = action.payload
+    },
+    removeJobs: (state) => {
+      state.jobs = [];
+      state.allJobs = [];
+    },
+    setLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
+  },
+});
 
-export const { addAllJobs, removeJobs, addFilteredJobs, setLoading, setError } = jobSlice.actions;
+export const {
+  addAllJobs,
+  addFilteredJobs,
+  setSelectedJob,
+  removeJobs,
+  setLoading,
+  setError,
+} = jobSlice.actions;
+
 export default jobSlice.reducer;

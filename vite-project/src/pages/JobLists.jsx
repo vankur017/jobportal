@@ -1,16 +1,16 @@
-import React from 'react'
-import JobCard from './JobCard'
+import React from 'react';
+import JobCard from './JobCard';
 
-const JobLists = (JobList) => {
-    const { jobs } = JobList;
-    console.log('JobList:', jobs);
-    console.log('JobList:', JobList);
-    
+const JobLists = ({ jobs }) => {
+  console.log('Jobs:', jobs);
+
   return (
-    <div>
-      
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+      {jobs.map((job, index) => (
+        <JobCard key={index} job={job} />
+      ))}
     </div>
-  )
-}
+  );
+};
 
-export default JobLists
+export default JobLists;
