@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase/config';
 import { signOut } from 'firebase/auth';
-
+import { removeJobs } from '../utils/jobSlice';
+import { useDispatch } from 'react-redux';
 const navLinks = [
   { name: 'Home', path: '/home' },
   { name: 'About', path: '/about' },
@@ -15,11 +16,15 @@ const navLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       console.log('User signed out');
+      sessionStorage.removeItem('token'); // Clear token from session storage
+      dispatch(removeJobs()); // Clear jobs from Redux store
+      setIsOpen(false); // Close the mobile menu if it's open
       navigate('/'); // or navigate to login if you have one
     } catch (error) {
       console.error('Logout failed:', error);

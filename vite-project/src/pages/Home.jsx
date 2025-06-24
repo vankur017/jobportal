@@ -5,6 +5,12 @@ import { useEffect, useState } from 'react'
 import { auth } from '../firebase/config'
 import { getJobs } from '../utils/fetchjobs'
 import { JOBAPI_URL } from '../constants/jobsapi'
+import { useDispatch } from 'react-redux'
+import { addAllJobs, addFilteredJobs } from '../utils/jobSlice'
+import { useSelector } from 'react-redux'
+import JobCard from './JobCard'
+import JobLists from './JobLists'
+
 
 const Home = () => {
 
@@ -14,30 +20,30 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('')
 
   const [message, setMessage] = useState('')
+  const dispatch = useDispatch()
+  const jobLists = useSelector((state)=> state.job.jobs)
+  console.log('Job Lists from Redux Store:', jobLists);
   
 
   useEffect(() => {
-    
-
-    const fetchData =  getJobs(JOBAPI_URL+ '/jobs')
-    
-    console.log('Fetching jobs from API...', jobs);
-    
-  
-
-    fetchData.then((data) => {
+  const fetchData = async () => {
+    try {
+      const data = await getJobs(JOBAPI_URL + '/jobs');
       if (data && data.length > 0) {
-        setJobs(data)
-        console.log('Jobs fetched successfully:', data);
+        setJobs(data);
+        dispatch(addAllJobs(data));
       } else {
-        setError('No jobs found')
-        console.error('No jobs found in the response');
+        setError('No jobs found');
       }
-    })
-    
+    } catch (err) {
+      console.error('API call failed:', err);
+      setError('Something went wrong');
+    }
+  };
 
-  
-  }, [])
+  fetchData(); // ✅ only called once on mount
+}, []);
+
   console.log(searchTerm);
   
 
@@ -82,12 +88,42 @@ const Home = () => {
               className="bg-transparent outline-none text-white w-full"
             />
           </div>
-          <button className="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg text-white font-semibold w-full sm:w-auto flex items-center gap-2 justify-center">
+          <button 
+          className="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg text-white font-semibold w-full sm:w-auto flex items-center gap-2 justify-center"
+          onClick={() => {
+            if(searchTerm.trim() === '') {
+              setMessage('Please enter a search term');
+            }
+            else {
+              setMessage('');
+              // Here you can implement the search functionality
+              console.log('Searching for:', searchTerm);
+            
+              // Example: Filter jobs based on search term
+              const filteredJobs = jobLists.filter(job => 
+                job.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                job.location.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+              if (filteredJobs.length > 0) {
+                setJobs(filteredJobs);
+                dispatch(addFilteredJobs(filteredJobs));
+              } else {
+                setMessage('No jobs found for the given search term');
+              }
+            }
+            
+          }
+          }
+          >
             <Search size={18} />
             Search
           </button>
         </motion.div>
       </div>
+      <div>
+        <JobLists jobs={jobLists} />
+      </div>
+         
     </div>
   )
 }
