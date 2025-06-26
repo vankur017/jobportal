@@ -17,8 +17,8 @@ function App() {
         <Route path='/' element={<Logon />} />
         <Route path='/jobs' element={<JobList />} />
         <Route path='/dashboard' element={<Dashboard />} />
-        <Route path='/jobs/:id' element={<JobDetail />} /> 
-        <Route path='/jobs/apply/:id' element={<ApplyJob />} />
+        <Route path='/job/:id' element={<JobDetail />} /> 
+        <Route path='/job/apply/:id' element={<ApplyJob />} />
       </Routes>
     </Provider>
     </>

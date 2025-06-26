@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import { useNavigate } from 'react-router-dom'
@@ -13,9 +13,26 @@ const Logon = () => {
   const [isSignInForm, setForm] = useState(false)
   const [message, setMessage] = useState('')
   const [token, setToken] = useState('')
+
+
+  // useEffect(() => {
+    
+  // }, [])
   
   const handleLogin = async (e) => {
     e.preventDefault()
+
+    const storedToken = sessionStorage.getItem('token') 
+    if (storedToken) {
+      setToken(storedToken)
+      
+      navigate('/home') // Redirect to home if token exists
+    }
+    else{
+      setToken('')
+      
+      navigate('/') // Redirect to login if no token
+    }
 
     const validationError = checkValidData(email, password)
     if (validationError) {
@@ -28,6 +45,7 @@ const Logon = () => {
         await signInWithEmailAndPassword(auth, email, password)
         setToken(auth.currentUser.accessToken)
         sessionStorage.setItem('token', auth.currentUser.accessToken)
+        
         navigate('/home')
       } catch (err) {
         setError('Invalid email or password. Please try again.')

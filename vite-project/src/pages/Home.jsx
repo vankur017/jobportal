@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion'
 import { Search, MapPin, Briefcase } from 'lucide-react'
 import Navbar from '../components/Navbar'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { auth } from '../firebase/config'
 import { getJobs } from '../utils/fetchjobs'
 import { JOBAPI_URL } from '../constants/jobsapi'
 import { useDispatch, useSelector } from 'react-redux'
 import { addAllJobs, addFilteredJobs } from '../utils/jobSlice'
 import JobLists from './JobLists'
+import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
   const [error, setError] = useState('')
@@ -15,12 +16,20 @@ const Home = () => {
   const [message, setMessage] = useState('')
   const dispatch = useDispatch()
   const [hasSearched, setHasSearched] = useState(false)
+  const navigate = useNavigate()
 
 
   const jobLists = useSelector((state) => state.job.jobs)
   const allJobs = useSelector((state) => state.job.allJobs) // assuming you store all jobs separately too
 
   useEffect(() => {
+
+    // const token = auth.currentUser?.accessToken
+    // if (!token) {
+    //   setError('User not authenticated')
+    //   navigate('/')
+    //   return
+    // }
     const fetchData = async () => {
       try {
         const data = await getJobs(JOBAPI_URL + '/jobs')
