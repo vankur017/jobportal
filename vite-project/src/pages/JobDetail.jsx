@@ -1,14 +1,18 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
+import ApplyJob from './ApplyJob';
 
 const JobDetail = () => {
   const { id } = useParams();
   const jobList = useSelector((state) => state.job.jobs);
+  const navigate = useNavigate();
  
-  
+  const handleClick = () => {
+    navigate(`/job/apply/${id}`);
+  }
 
   if (!jobList) {
     return <div className="text-center text-white mt-10">Job not found</div>;
@@ -63,8 +67,18 @@ const JobDetail = () => {
               ))}
             </div>
           </div>
+           
+        </div>
+        <div className='items-center justify-center flex mt-6'>
+          <span 
+          className='bg-amber-500 text-white px-4 py-1 rounded-full text-xs font-semibold inline-block mt-2'
+          onClick={handleClick}
+          >
+            Apply
+          </span>
         </div>
       </motion.div>
+      
     </div>
     </>
   );

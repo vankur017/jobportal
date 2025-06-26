@@ -1,6 +1,7 @@
 import React from 'react';
 import JobCard from './JobCard';
 
+
 const JobLists = ({ jobs }) => {
   console.log('Jobs:', jobs);
 

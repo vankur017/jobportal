@@ -20,6 +20,9 @@ const jobSlice = createSlice({
     setSelectedJob: (state, action) => {
       state.jobs = action.payload
     },
+    addSuggetedJob: (state, action) => {
+      state.jobs = action.payload; // update jobs with suggested jobs
+    },
     removeJobs: (state) => {
       state.jobs = [];
       state.allJobs = [];
@@ -36,6 +39,7 @@ const jobSlice = createSlice({
 export const {
   addAllJobs,
   addFilteredJobs,
+  addSuggetedJob,
   setSelectedJob,
   removeJobs,
   setLoading,
