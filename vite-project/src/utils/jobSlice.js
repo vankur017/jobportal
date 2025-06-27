@@ -4,6 +4,7 @@ const jobSlice = createSlice({
   name: "job",
   initialState: {
     jobs: [],        // filtered or displayed jobs
+    suggestedJob:[], // suggested jobs
     allJobs: [],     // original list fetched from API
     isLoading: false,
     selectedJob: null,
@@ -21,7 +22,8 @@ const jobSlice = createSlice({
       state.jobs = action.payload
     },
     addSuggetedJob: (state, action) => {
-      state.jobs = action.payload; // update jobs with suggested jobs
+      state.suggestedJob.push(action.payload); // add suggested job to the list
+      
     },
     removeJobs: (state) => {
       state.jobs = [];
