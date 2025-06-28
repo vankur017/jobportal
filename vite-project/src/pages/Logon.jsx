@@ -4,6 +4,7 @@ import { auth } from '../firebase/config'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { checkValidData } from '../utils/validate'
+import FloatingRoles from '../components/FloatingRoles'
 
 const Logon = () => {
   const [email, setEmail] = useState('')
@@ -77,35 +78,14 @@ const Logon = () => {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
-        {/* Animated scrolling text */}
-        
-        <div className="w-full max-w-4xl mb-8 sm:mb-12">
-  <div className="overflow-hidden h-24 sm:h-28 relative">
-    {['Software Developer', 'Frontend Engineer', 'Full Stack Developer', 'UI/UX Designer', 'Software Tester'].map((title, index) => (
-      <motion.div
-        key={index}
-        initial={{ x: '100vw', opacity: 0 }}
-        animate={{ x: '-100vw', opacity: 1 }}
-        transition={{ 
-          duration: 20 + index * 2,
-          ease: 'linear',
-          repeat: Infinity,
-          delay: index * 4
-        }}
-        className="absolute whitespace-nowrap"
-        style={{ top: `${index * 36}px` }}
-      >
-        <span className="inline-block text-base sm:text-xl font-semibold text-white bg-gradient-to-br from-purple-600/70 to-blue-500/70 px-6 py-2 rounded-2xl shadow-md border border-white/20 backdrop-blur-lg tracking-wide">
-          👨‍💻 {title}
-        </span>
-      </motion.div>
-    ))}
-  </div>
-</div>
+       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+  
+    
+    <FloatingRoles />
 
 
-        {/* Main form container */}
+
+       
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}

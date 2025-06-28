@@ -25,6 +25,10 @@ const jobSlice = createSlice({
       state.suggestedJob.push(action.payload); // add suggested job to the list
       
     },
+       clearSuggestedJobs: (state) => {
+      state.suggestedJob = []; // clears the array on logout
+    }
+    ,
     removeJobs: (state) => {
       state.jobs = [];
       state.allJobs = [];
@@ -45,6 +49,7 @@ export const {
   setSelectedJob,
   removeJobs,
   setLoading,
+  clearSuggestedJobs,
   setError,
 } = jobSlice.actions;
 
