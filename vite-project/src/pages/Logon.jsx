@@ -81,28 +81,29 @@ const Logon = () => {
         {/* Animated scrolling text */}
         
         <div className="w-full max-w-4xl mb-8 sm:mb-12">
-          <div className="overflow-hidden h-20 sm:h-24 relative">
-            {['Software Developer', 'Frontend Engineer', 'Full Stack Developer', 'UI/UX Designer', 'Software Tester'].map((title, index) => (
-              <motion.div
-                key={index}
-                initial={{ x: '100vw', opacity: 0 }}
-                animate={{ x: '-100vw', opacity: 1 }}
-                transition={{ 
-                  duration: 12 + index * 2, 
-                  ease: 'linear', 
-                  repeat: Infinity,
-                  delay: index * 3 
-                }}
-                className="absolute whitespace-nowrap"
-                style={{ top: `${index * 20}px` }}
-              >
-                <span className="inline-block bg-gradient-to-r from-purple-400 to-blue-400 text-transparent bg-clip-text border border-purple-400/30 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm bg-white/5">
-                  {title}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+  <div className="overflow-hidden h-24 sm:h-28 relative">
+    {['Software Developer', 'Frontend Engineer', 'Full Stack Developer', 'UI/UX Designer', 'Software Tester'].map((title, index) => (
+      <motion.div
+        key={index}
+        initial={{ x: '100vw', opacity: 0 }}
+        animate={{ x: '-100vw', opacity: 1 }}
+        transition={{ 
+          duration: 20 + index * 2,
+          ease: 'linear',
+          repeat: Infinity,
+          delay: index * 4
+        }}
+        className="absolute whitespace-nowrap"
+        style={{ top: `${index * 36}px` }}
+      >
+        <span className="inline-block text-base sm:text-xl font-semibold text-white bg-gradient-to-br from-purple-600/70 to-blue-500/70 px-6 py-2 rounded-2xl shadow-md border border-white/20 backdrop-blur-lg tracking-wide">
+          👨‍💻 {title}
+        </span>
+      </motion.div>
+    ))}
+  </div>
+</div>
+
 
         {/* Main form container */}
         <motion.div 
