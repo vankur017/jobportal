@@ -4,9 +4,10 @@ import JobCard from '../pages/JobCard';
 import { motion } from 'framer-motion';
 
 const SuggestedJobs = () => {
-  const jobs = useSelector((state) => state.job.suggestedJob?.[0] || []);
-  console.log(jobs);
-  
+  // ✅ Use the full array of suggested jobs, not just [0]
+  const jobs = useSelector((state) => state.job.suggestedJob) || [];
+
+  console.log("Suggested Jobs:", jobs); // Optional: check structure
 
   if (!jobs || jobs.length === 0) return null;
 

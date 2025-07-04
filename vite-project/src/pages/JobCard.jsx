@@ -15,6 +15,7 @@ const JobCard = ({ job }) => {
    const handleClick = () => {
     dispatch(setSelectedJob(job)); 
     navigate(`/job/${job.id}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
   return (

@@ -23,7 +23,7 @@ const jobSlice = createSlice({
       localStorage.setItem('selectedJob', JSON.stringify(action.payload)); 
     },
     addSuggetedJob: (state, action) => {
-      state.suggestedJob.push(action.payload); // add suggested job to the list
+      state.suggestedJob =action.payload; // add suggested job to the list
       
     },
       clearSuggestedJobs: (state) => {

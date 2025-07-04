@@ -4,11 +4,29 @@ import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import SuggestedJobs from '../components/SuggestedJobs';
+import { jobById } from '../utils/jobById';
 
 const JobDetail = () => {
   const { id } = useParams();
-  const jobs = useSelector((state) => state.job.jobs);
-  const job = jobs.find((j) => String(j.id) === String(id));
+  // const jobs = useSelector((state) => state.job.jobs);
+  // const job = jobs.find((j) => String(j.id) === String(id));
+
+  const [job, setJob] = useState(null);
+  
+  useEffect(()=>{
+
+    const fetchJob = async () => {
+      try {
+        const jobData = await jobById(id);
+        setJob(jobData);
+      } catch (error) {
+        console.error('Error fetching job:', error);
+      }
+    };
+
+    fetchJob();
+
+  }, [id])
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -25,7 +43,7 @@ const JobDetail = () => {
     }, 600);
   }, [navigate]);
 
-  if (loading || !jobs.length) {
+  if (loading || !job) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center">
