@@ -19,13 +19,14 @@ const jobSlice = createSlice({
       state.jobs = action.payload;     // update only the filtered view
     },
     setSelectedJob: (state, action) => {
-      state.jobs = action.payload
+      state.selectedJob = action.payload;
+      localStorage.setItem('selectedJob', JSON.stringify(action.payload)); 
     },
     addSuggetedJob: (state, action) => {
       state.suggestedJob.push(action.payload); // add suggested job to the list
       
     },
-       clearSuggestedJobs: (state) => {
+      clearSuggestedJobs: (state) => {
       state.suggestedJob = []; // clears the array on logout
     }
     ,

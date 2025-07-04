@@ -6,11 +6,15 @@ import { useSelector } from 'react-redux';
 const ApplyJob = () => {
 
   const { id } = useParams();
+    
   const job = useSelector((state) => state.job.jobs);
    const navigate = useNavigate();
    console.log(job);
    
   const [loading, setLoading] = useState(true); // Loader state
+
+     
+
 
    useEffect(() => {
       const token = sessionStorage.getItem('token');
@@ -42,7 +46,7 @@ const ApplyJob = () => {
 
   return (
     <div className='bg-black text-white  px-4'>
-      <ApplyForm />
+      <ApplyForm job={job} />
     </div>
   )
 }

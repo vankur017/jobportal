@@ -8,7 +8,7 @@ const mockDataRaw = require("./MOCK_DATA.json");
 admin.initializeApp(); // Initializes with default credentials
 
 const app = express();
-app.use(cors({ origin: true }));
+app.use(cors({ origin: '*' }));
 
 const mockData = mockDataRaw.map((job, index) => ({
   id: index + 1,

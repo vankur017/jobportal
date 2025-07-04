@@ -3,36 +3,29 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
-import SuggestedJobs from '../components/SuggestedJobs'; 
+import SuggestedJobs from '../components/SuggestedJobs';
 
 const JobDetail = () => {
   const { id } = useParams();
-  const job = useSelector((state) => state.job.jobs);
-  const suggestedJob = useSelector((state) => state.job.suggestedJob[0]);
-  
-  console.log(suggestedJob);
-  
+  const jobs = useSelector((state) => state.job.jobs);
+  const job = jobs.find((j) => String(j.id) === String(id));
 
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true); // Loader state
+  const [loading, setLoading] = useState(true);
 
- 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    
-    //delay in auth token retrival showing spinner
-    
+
     setTimeout(() => {
       if (!token) {
         navigate('/');
       } else {
-        setLoading(false); 
+        setLoading(false);
       }
-    }, 600); 
+    }, 600);
   }, [navigate]);
 
-  // Spinner during token check
-  if (loading) {
+  if (loading || !jobs.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center">
@@ -43,14 +36,12 @@ const JobDetail = () => {
     );
   }
 
-  // 🚫 Fallback if job not found
   if (!job) {
     return <div className="text-center text-white mt-10">Job not found</div>;
   }
 
   const handleClick = () => {
     navigate(`/job/apply/${id}`);
-
   };
 
   return (
@@ -80,7 +71,7 @@ const JobDetail = () => {
               <Detail label="Location" value={job.location} />
               <Detail label="Job Type" value={job.job_type} />
               <Detail label="Posted On" value={job.posted_date} />
-             <Detail
+              <Detail
                 label="Salary"
                 value={job.salary != null ? `₹${job.salary.toLocaleString()}` : 'Not Disclosed'}
               />
@@ -115,7 +106,6 @@ const JobDetail = () => {
             </span>
           </div>
         </motion.div>
-       
       </div>
       <div className='bg-[#0f0f0f] text-white flex items-center justify-center px-4 '>
         <SuggestedJobs />
@@ -131,4 +121,4 @@ const Detail = ({ label, value }) => (
   </div>
 );
 
-export default JobDetail;
+export default JobDetail; 

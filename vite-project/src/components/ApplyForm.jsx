@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { app } from '../firebase/config.js'; // Your firebase config file
 import Navbar from './Navbar.jsx';
+import { useSelector } from 'react-redux';
 
 const storage = getStorage(app);
 
-export default function App() {
+const ApplyForm = ({job}) => {
+
+  console.log(job);
+  
   const { register, handleSubmit, reset } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -166,3 +170,6 @@ export default function App() {
     </div>
   );
 }
+
+
+export default ApplyForm;

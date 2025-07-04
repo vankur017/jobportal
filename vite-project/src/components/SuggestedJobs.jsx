@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 
 const SuggestedJobs = () => {
   const jobs = useSelector((state) => state.job.suggestedJob?.[0] || []);
+  console.log(jobs);
+  
 
   if (!jobs || jobs.length === 0) return null;
 
