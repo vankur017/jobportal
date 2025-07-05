@@ -7,6 +7,7 @@ import JobDetail from './pages/JobDetail'
 import ApplyJob from './pages/ApplyJob'
 import { Provider } from 'react-redux';
 import appStore from './utils/appStore'
+import About from './pages/About'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path='/home' element={<Home />} />
         <Route path='/' element={<Logon />} />
         <Route path='/jobs' element={<JobList />} />
+         <Route path='/about' element={<About />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/job/:id' element={<JobDetail />} /> 
         <Route path='/job/apply/:id' element={<ApplyJob />} />

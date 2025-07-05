@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
@@ -10,7 +10,14 @@ const JobDetail = () => {
   const { id } = useParams();
   // const jobs = useSelector((state) => state.job.jobs);
   // const job = jobs.find((j) => String(j.id) === String(id));
+  const location = useLocation()
 
+  const searchTerm = location.state.searchTerm
+
+ console.log(searchTerm);
+ 
+  
+  
   const [job, setJob] = useState(null);
   
   useEffect(()=>{
@@ -126,7 +133,7 @@ const JobDetail = () => {
         </motion.div>
       </div>
       <div className='bg-[#0f0f0f] text-white flex items-center justify-center px-4 '>
-        <SuggestedJobs />
+        <SuggestedJobs searchTerm={searchTerm} />
       </div>
     </>
   );

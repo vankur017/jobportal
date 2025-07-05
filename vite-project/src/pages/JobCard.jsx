@@ -6,18 +6,23 @@ import { setSelectedJob } from '../utils/jobSlice'
 import ShinyText from '../components/ShinyText'
 
 
-const JobCard = ({ job }) => {
+const JobCard = ({ job, searchTerm  }) => {
 
   // const handleJobDetails = useSelector((state)=>state.job.jobs)
   // console.log(handleJobDetails);
   const navigate = useNavigate()
   const dispatch = useDispatch()
-   const handleClick = () => {
-    dispatch(setSelectedJob(job)); 
-    navigate(`/job/${job.id}`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  
+ const handleClick = () => {
+  dispatch(setSelectedJob(job)); 
+  navigate(`/job/${job.id}`, {
+    state: { searchTerm },
+  });
+
+  // Delay scroll to allow the route to change
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 100); // 100ms delay works well
+};
   return (
 
     <div>

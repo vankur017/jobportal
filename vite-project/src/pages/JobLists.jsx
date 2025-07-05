@@ -1,9 +1,8 @@
 import React from 'react';
 import JobCard from './JobCard';
 
-const JobLists = ({ jobs, showSearch }) => {
-  console.log('Jobs:', jobs);
-  console.log('showSearch:', showSearch);
+const JobLists = ({ jobs, showSearch, searchTerm}) => {
+
 
   return (
     <div
@@ -19,7 +18,7 @@ const JobLists = ({ jobs, showSearch }) => {
         } max-w-screen-2xl mx-auto`}
     >
       {jobs.map((job, index) => (
-        <JobCard key={index} job={job} />
+        <JobCard key={index} job={job} searchTerm={searchTerm}  />
       ))}
     </div>
   );

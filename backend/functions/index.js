@@ -47,7 +47,26 @@ app.post("/upload-resume", upload.single("resume"), async (req, res) => {
 
 // Get all jobs
 app.get("/jobs", (req, res) => {
-  res.status(200).json(mockData);
+  const { location, role } = req.query;
+
+  // Start with all jobs
+  let filteredJobs = mockData;
+
+  // Filter by location (if provided)
+  if (location) {
+    filteredJobs = filteredJobs.filter(job =>
+      job.location.toLowerCase().includes(location.toLowerCase())
+    );
+  }
+
+  // Filter by role (job_title) (if provided)
+  if (role) {
+    filteredJobs = filteredJobs.filter(job =>
+      job.job_title.toLowerCase().includes(role.toLowerCase())
+    );
+  }
+
+  res.status(200).json(filteredJobs);
 });
 
 // Get job by ID
@@ -61,3 +80,4 @@ app.get("/job/:id", (req, res) => {
 });
 
 exports.api = functions.https.onRequest(app);
+  `-`

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Search, Briefcase } from 'lucide-react';
+import { Search, Briefcase, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { auth } from '../firebase/config';
 import { getJobs } from '../utils/fetchjobs';
 import { JOBAPI_URL } from '../constants/jobsapi';
@@ -11,47 +11,24 @@ import JobLists from './JobLists';
 import { useNavigate } from 'react-router-dom';
 import GradientText from '../components/GradientText';
 import { onAuthStateChanged } from 'firebase/auth';
-
+import { jobsQuery } from '../utils/jobsQuery';
 
 const Home = () => {
   const [error, setError] = useState('');
-  const [inputValue, setInputValue] = useState('');
+  const [roleInput, setRoleInput] = useState('');
+  const [locationInput, setLocationInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showSearch, setShowSearch] = useState(false);
+  const [filteredJobs, setFilteredJobs] = useState([]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const jobLists = useSelector((state) => state.job.jobs);
   const allJobs = useSelector((state) => state.job.allJobs);
-  const suggestedJobs = useSelector((state) => state.job.suggestedJob);
+  const jobLists = useSelector((state) => state.job.jobs);
 
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  // Debounced input handler
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const trimmed = inputValue.trim().toLowerCase();
-      setSearchTerm(trimmed);
-
-      if (trimmed) {
-        const matched = allJobs.filter((job) =>
-          job.job_title.toLowerCase().includes(trimmed)
-        );
-        setSuggestions(matched.slice(0, 5));
-      } else {
-        setSuggestions([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [inputValue, allJobs]);
-
-  // Auth and job fetch
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -84,40 +61,46 @@ const Home = () => {
     return () => unsubscribe();
   }, [dispatch, navigate]);
 
-  const filteredJobs = useMemo(() => {
-    if (!searchTerm) return [];
-    return allJobs.filter((job) =>
-      job.job_title.toLowerCase().includes(searchTerm) ||
-      job.location.toLowerCase().includes(searchTerm)
-    );
-  }, [allJobs, searchTerm]);
+  useEffect(() => {
+    const fetchJobsQuery = async () => {
+      if (!searchTerm) return;
+
+      const [role, location] = searchTerm.split('||');
+
+      try {
+        const jobs = await jobsQuery({ role, location });
+        setFilteredJobs(jobs);
+        dispatch(addFilteredJobs(jobs));
+        dispatch(addSuggetedJob(jobs));
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+        setMessage('Failed to fetch jobs');
+      }
+    };
+
+    fetchJobsQuery();
+  },
+   [searchTerm, dispatch]);
 
   const handleSearch = useCallback(() => {
-    const trimmed = searchTerm.trim();
-    if (!trimmed) {
-      setMessage('Please enter a search term');
+    const trimmedRole = roleInput.trim();
+    const trimmedLocation = locationInput.trim();
+
+    if (!trimmedRole && !trimmedLocation) {
+      setMessage('Please enter a role or location to search');
       setHasSearched(false);
-      
       dispatch(addFilteredJobs([]));
       return;
     }
 
-    if (filteredJobs.length > 0) {
-      dispatch(addFilteredJobs(filteredJobs));
-      dispatch(addSuggetedJob(filteredJobs));
-
-      setMessage('');
-    } else {
-      dispatch(addFilteredJobs([]));
-      setMessage('No jobs found for the given search term');
-    }
-
+    setSearchTerm(`${trimmedRole}||${trimmedLocation}`);
     setHasSearched(true);
-    setShowSuggestions(false);
-     setShowSearch(false);
-  }, [searchTerm, filteredJobs, dispatch]);
+  }, [roleInput, locationInput, dispatch]);
 
-if (loading) {
+
+  
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center">
@@ -128,9 +111,8 @@ if (loading) {
     );
   }
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-black to-zinc-800 text-white p-6">
+    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white px-6 py-10">
       <Navbar />
       {error && <p className="text-center text-red-500 mt-2">{error}</p>}
 
@@ -156,42 +138,28 @@ if (loading) {
           transition={{ delay: 0.4 }}
           className="bg-white/10 mt-20 backdrop-blur-md border border-zinc-700 p-4 rounded-xl max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 items-center"
         >
-          <div className="relative w-full">
+          <div className="flex flex-col sm:flex-row w-full gap-4">
             <div className="flex items-center gap-2 bg-zinc-800 p-3 rounded-lg w-full">
               <Briefcase className="text-indigo-400" />
               <input
                 type="text"
-                placeholder="Search by skills, title..."
+                placeholder="Search for roles..."
                 className="bg-transparent outline-none text-white w-full"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onFocus={() => {
-                  setShowSuggestions(true)
-                  setShowSearch(true);  
-                }}
-                onBlur={() => setTimeout(() =>{ 
-                  setShowSuggestions(false)
-                  setShowSearch(false);
-                }, 200)}
+                value={roleInput}
+                onChange={(e) => setRoleInput(e.target.value)}
               />
             </div>
-            {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute bg-zinc-900 border border-zinc-700 mt-1 w-full rounded-lg z-50 shadow-lg max-h-60 overflow-y-auto">
-                {suggestions.map((job, index) => (
-                  <li
-                    key={index}
-                    className="px-4 py-2 hover:bg-zinc-800 cursor-pointer text-sm text-white"
-                    onClick={() => {
-                      setInputValue(job.job_title);
-                      setSearchTerm(job.job_title);
-                      handleSearch();
-                    }}
-                  >
-                    {job.job_title}
-                  </li>
-                ))}
-              </ul>
-            )}
+
+            <div className="flex items-center gap-2 bg-zinc-800 p-3 rounded-lg w-full">
+              <MapPin className="text-indigo-400" />
+              <input
+                type="text"
+                placeholder="Search by location..."
+                className="bg-transparent outline-none text-white w-full"
+                value={locationInput}
+                onChange={(e) => setLocationInput(e.target.value)}
+              />
+            </div>
           </div>
 
           <button
@@ -207,7 +175,9 @@ if (loading) {
       </div>
 
       <div className="mt-8">
-        {hasSearched && jobLists.length > 0 && <JobLists showSearch={showSearch} jobs={jobLists} />}
+        {hasSearched && jobLists.length > 0 && (
+          <JobLists showSearch={true} searchTerm={searchTerm} jobs={jobLists} />
+        )}
       </div>
     </div>
   );

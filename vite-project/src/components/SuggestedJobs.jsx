@@ -1,13 +1,66 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import JobCard from '../pages/JobCard';
 import { motion } from 'framer-motion';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase/config';
+import { getJobs } from '../utils/fetchjobs';
+import { JOBAPI_URL } from '../constants/jobsapi';
+import { jobsQuery } from '../utils/jobsQuery';
+import { addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
 
-const SuggestedJobs = () => {
-  // ✅ Use the full array of suggested jobs, not just [0]
-  const jobs = useSelector((state) => state.job.suggestedJob) || [];
+const SuggestedJobs = ({searchTerm}) => {
 
-  console.log("Suggested Jobs:", jobs); // Optional: check structure
+  const [jobs, setJobs] = useState()
+  const dispatch = useDispatch()
+
+
+   useEffect(() => {
+      const fetchJobsQuery = async () => {
+        if (!searchTerm) return;
+  
+        const [role, location] = searchTerm.split('||');
+  
+        try {
+          const jobquery = await jobsQuery({ role, location });
+          setJobs(jobquery)
+          dispatch(addFilteredJobs(jobs));
+          dispatch(addSuggetedJob(jobs));
+        } catch (error) {
+          console.error('Error fetching jobs:', error);
+          setMessage('Failed to fetch jobs');
+        }
+      };
+  
+      fetchJobsQuery();
+    },
+     [searchTerm, dispatch]);
+
+      // const [role, location] = searchTerm.split('||');
+
+  
+  //  const suuge = async()=>{
+  //    try {
+  //       const data = await getJobs(JOBAPI_URL + '/jobs');
+  //       if (data && data.length > 0) {
+  //         console.log("Fetched Jobs:", data);
+          
+  //       } else {
+  //         setError('No jobs found');
+  //       }
+  //     } catch (err) {
+  //       console.error('API call failed:', err);
+  //       setError('Something went wrong');
+  //     } 
+
+  //  }
+
+  //  // Auth and job fetch
+  // useEffect(() => {
+  //   suuge();
+  // }, []);
+
+  // console.log("Suggested Jobs:", jobs);
 
   if (!jobs || jobs.length === 0) return null;
 
