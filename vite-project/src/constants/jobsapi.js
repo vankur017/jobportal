@@ -1,1 +1,1 @@
-export const JOBAPI_URL = 'https://api-am5r376q7a-uc.a.run.app'
+export const JOBAPI_URL = 'https://api-am5r376q7a-el.a.run.app'

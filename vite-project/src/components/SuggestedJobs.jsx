@@ -10,7 +10,7 @@ import { jobsQuery } from '../utils/jobsQuery';
 import { addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
 
 const SuggestedJobs = ({searchTerm}) => {
-
+  
   const [jobs, setJobs] = useState()
   const dispatch = useDispatch()
 
@@ -24,6 +24,8 @@ const SuggestedJobs = ({searchTerm}) => {
         try {
           const jobquery = await jobsQuery({ role, location });
           setJobs(jobquery)
+          console.log(jobquery);
+          
           dispatch(addFilteredJobs(jobs));
           dispatch(addSuggetedJob(jobs));
         } catch (error) {

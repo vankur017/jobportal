@@ -8,8 +8,12 @@ const ApplyJob = () => {
   const { id } = useParams();
     
   const job = useSelector((state) => state.job.jobs);
-   const navigate = useNavigate();
-   console.log(job);
+  const navigate = useNavigate();
+  const selectedJob = useSelector((state)=>state.job.selectedJob)
+
+
+  console.log(job);
+   
    
   const [loading, setLoading] = useState(true); // Loader state
 
@@ -46,7 +50,7 @@ const ApplyJob = () => {
 
   return (
     <div className='bg-black text-white  px-4'>
-      <ApplyForm job={job} />
+      <ApplyForm selectedJob={selectedJob} />
     </div>
   )
 }

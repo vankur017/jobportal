@@ -18,7 +18,7 @@ const About = () => {
 
         <p className="text-gray-400 text-lg leading-relaxed mb-10">
           Hi 👋 I'm <span className="text-white font-semibold">Ankur Verma</span>, an Associate Software Developer at DXC Technology. 
-          I design highly interactive web apps using modern frontend technologies like React, Redux Toolkit, Tailwind CSS, and Framer Motion — with a strong focus on minimal design, performance, and animation.
+          I design highly interactive web apps using modern frontend technologies like React, Redux, Javascript, Tailwind CSS, and Framer Motion — with a strong focus on minimal design, performance, and animation.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
@@ -30,10 +30,10 @@ const About = () => {
           >
             <h3 className="text-xl font-bold text-white mb-2">Tech Stack</h3>
             <ul className="list-disc list-inside text-gray-400 space-y-1">
-              <li>React, Redux Toolkit, Tailwind CSS</li>
-              <li>Framer Motion, TypeScript, Vite</li>
+              <li>React, Redux, Tailwind CSS</li>
+              <li>Framer Motion, Javascript, TypeScript, Vite</li>
               <li>Firebase (Auth, Firestore, Functions)</li>
-              <li>Node.js, Git, Netlify</li>
+              <li>Node.js, Git</li>
             </ul>
           </motion.div>
 

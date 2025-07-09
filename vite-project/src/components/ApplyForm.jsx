@@ -1,175 +1,190 @@
-// App.jsx
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { app } from '../firebase/config.js'; // Your firebase config file
-import Navbar from './Navbar.jsx';
-import { useSelector } from 'react-redux';
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Navbar from "./Navbar";
+import { JOBAPI_URL } from "../constants/jobsapi";
+import SuccessModal from "./SuccessModal";  // Make sure this exists
 
-const storage = getStorage(app);
+const ApplyForm = ({ selectedJob }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    mobile: "",
+    mailId: "",
+    currentCTC: "",
+    expectedCTC: ""
+  });
 
-const ApplyForm = ({job}) => {
-
-  console.log(job);
-  
-  const { register, handleSubmit, reset } = useForm();
+  const [resumeFile, setResumeFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState("");
+  const fileInputRef = useRef(null);
 
-  
+  const [showForm, setShowForm] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-      const onSubmit = async (data) => {
-        setIsSubmitting(true);
-        console.log(data);
-        
-      
-        try {
-          // Extract the resume file
-          const file = data.resume[0]; // resume is an array from input
-          const fileName = `resumes/${Date.now()}-${file.name}`;
-          const storageRef = ref(storage, fileName);
-        
-          // Upload to Firebase Storage
-          await uploadBytes(storageRef, file);
-          const downloadURL = await getDownloadURL(storageRef);
-        
-          // You can now save downloadURL + form data in Firestore or send to backend
-          console.log('Resume uploaded:', downloadURL);
-          console.log('Full form data:', {
-            ...data,
-            resumeURL: downloadURL,
-          });
-        
-          setSubmitted(true);
-          reset();
-        } catch (error) {
-          console.error('Upload failed:', error);
-          console.log('Something went wrong while uploading your resume.');
-        }
-      
-        setIsSubmitting(false);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage("");
+
+    if (!resumeFile) {
+      setMessage("Please select a resume file.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const base64File = await fileToBase64(resumeFile);
+
+      const payload = {
+        ...formData,
+        resumeFile: base64File,
+        resumeFileName: resumeFile.name
       };
-  
 
-  if(isSubmitting){
-     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
-          <p className="text-sm text-gray-400">Submitting, Please Wait....</p>
-        </div>
-      </div>
-    );
-  }
-  if (submitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="flex flex-col items-center">
-          <p className="text-xl font-semibold mb-4">🎉 Application Submitted!</p>
-          <p className="text-sm text-gray-400">We’ll get back to you shortly.</p>
-        </div>
-      </div>
-    );
-  }
+      const response = await fetch(`${JOBAPI_URL}/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage(`✅ Application for ${selectedJob.job_title} submitted successfully!`);
+        setFormData({
+          name: "",
+          mobile: "",
+          mailId: "",
+          currentCTC: "",
+          expectedCTC: ""
+        });
+        setResumeFile(null);
+        fileInputRef.current.value = "";
+        setShowForm(false);
+        setShowSuccess(true);
+      } else {
+        setMessage(result.error || "❌ Submission failed.");
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      setMessage("❌ Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white px-4 py-10">
       <Navbar />
-      <div className="min-h-screen from-slate-900 via-zinc-900 to-slate-900 text-white flex items-center justify-center px-4">
-      
-        <div className="w-full max-w-lg">
-          <AnimatePresence mode="wait">
-            {isSubmitting ? (
+
+      <AnimatePresence>
+        <>
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 30 }}
+              transition={{ duration: 0.7 }}
+              className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-start mt-10"
+            >
+              {/* Job Card */}
               <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="bg-gray-900 rounded-2xl p-8 text-center shadow-lg"
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.6, type: "spring" }}
+                className="bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-700"
               >
-                <motion.div
-                  className="w-10 h-10 border-4 border-dashed border-gray-400 rounded-full animate-spin mx-auto mb-4"
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ repeat: Infinity, duration: 0.6 }}
-                />
-                <p className="text-lg font-medium">Submitting your application...</p>
+                <div className="flex items-center space-x-4 mb-6">
+                  <img
+                    src={selectedJob?.image}
+                    alt="Company Logo"
+                    className="w-16 h-16 rounded-lg border border-gray-600 object-cover"
+                  />
+                  <div>
+                    <h1 className="text-xl font-bold">{selectedJob?.job_title}</h1>
+                    <p className="text-gray-400">{selectedJob?.company_name}</p>
+                    <p className="text-gray-400 text-sm">{selectedJob?.location}</p>
+                  </div>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Apply now to be part of {selectedJob?.company_name}'s team as a {selectedJob?.job_title} in {selectedJob?.location}.
+                </p>
               </motion.div>
-            ) : submitted ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="bg-green-900 text-green-200 rounded-2xl p-8 text-center shadow-lg"
-              >
-                <p className="text-xl font-semibold">🎉 Application Submitted!</p>
-                <p className="text-sm mt-2 opacity-80">We’ll get back to you shortly.</p>
-              </motion.div>
-            ) : (
+
+              {/* Application Form */}
               <motion.form
-                key="form"
-                onSubmit={handleSubmit(onSubmit)}
-                initial={{ opacity: 0, y: 40 }}
+                onSubmit={handleSubmit}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="bg-gray-900 rounded-2xl p-8 shadow-lg space-y-6"
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ delay: 0.5, duration: 0.7 }}
+                className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700 space-y-5"
               >
-                <motion.h2
-                  className="text-2xl font-bold text-white"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
+                <h2 className="text-2xl font-bold mb-4">🚀 Apply for This Role</h2>
+
+                {["name", "mobile", "mailId", "currentCTC", "expectedCTC"].map((field, index) => (
+                  <input
+                    key={index}
+                    type={field === "mailId" ? "email" : "text"}
+                    name={field}
+                    placeholder={field === "mailId" ? "Email" : field.charAt(0).toUpperCase() + field.slice(1)}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  />
+                ))}
+
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setResumeFile(e.target.files[0])}
+                  ref={fileInputRef}
+                  required
+                  className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                />
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 rounded-lg font-semibold ${
+                    isSubmitting ? "bg-gray-600 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+                  } transition duration-300`}
                 >
-                  🚀 Apply for a Role
-                </motion.h2>
-                <div>
-                  <label className="block mb-1 text-sm text-gray-400">Full Name</label>
-                  <input
-                    {...register('fullName', { required: true })}
-                    type="text"
-                    className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="e.g. Ankur Verma"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-sm text-gray-400">Gender</label>
-                  <select
-                    {...register('gender', { required: true })}
-                    className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="">Select</option>
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block mb-1 text-sm text-gray-400">Upload Resume (PDF)</label>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    {...register('resume', { required: true })}
-                    className="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
-                  />
-                </div>
-                <button type="submit" className='w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 '>
-                  <motion.span
-                    className="text-white font-semibold"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Submit Application
-                  </motion.span>
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
+
+                {message && <p className="mt-2 text-sm text-yellow-400">{message}</p>}
               </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+            </motion.div>
+          )}
+
+          {showSuccess && (
+            <SuccessModal
+              onClose={() => {
+                setShowSuccess(false);
+                setShowForm(true);
+              }}
+            />
+          )}
+        </>
+      </AnimatePresence>
     </div>
   );
-}
-
+};
 
 export default ApplyForm;

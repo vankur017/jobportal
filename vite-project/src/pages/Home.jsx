@@ -1,17 +1,18 @@
 import { motion } from 'framer-motion';
 import { Search, Briefcase, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { auth } from '../firebase/config';
 import { getJobs } from '../utils/fetchjobs';
 import { JOBAPI_URL } from '../constants/jobsapi';
 import { useDispatch, useSelector } from 'react-redux';
-import { addAllJobs, addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
-import JobLists from './JobLists';
+import { addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
 import { useNavigate } from 'react-router-dom';
 import GradientText from '../components/GradientText';
 import { onAuthStateChanged } from 'firebase/auth';
 import { jobsQuery } from '../utils/jobsQuery';
+
+const JobLists = lazy(() => import('./JobLists'));
 
 const Home = () => {
   const [error, setError] = useState('');
@@ -25,8 +26,6 @@ const Home = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const allJobs = useSelector((state) => state.job.allJobs);
   const jobLists = useSelector((state) => state.job.jobs);
 
   useEffect(() => {
@@ -43,10 +42,11 @@ const Home = () => {
         return;
       }
 
+      setLoading(true);
       try {
         const data = await getJobs(JOBAPI_URL + '/jobs');
         if (data && data.length > 0) {
-          dispatch(addAllJobs(data));
+          dispatch(addFilteredJobs(data));
         } else {
           setError('No jobs found');
         }
@@ -66,21 +66,22 @@ const Home = () => {
       if (!searchTerm) return;
 
       const [role, location] = searchTerm.split('||');
-
+      setLoading(true);
       try {
         const jobs = await jobsQuery({ role, location });
         setFilteredJobs(jobs);
-        dispatch(addFilteredJobs(jobs));
+        dispatch(addFilteredJobs(jobs));  // still updating store as you do
         dispatch(addSuggetedJob(jobs));
       } catch (error) {
         console.error('Error fetching jobs:', error);
         setMessage('Failed to fetch jobs');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchJobsQuery();
-  },
-   [searchTerm, dispatch]);
+  }, [searchTerm, dispatch]);
 
   const handleSearch = useCallback(() => {
     const trimmedRole = roleInput.trim();
@@ -97,30 +98,17 @@ const Home = () => {
     setHasSearched(true);
   }, [roleInput, locationInput, dispatch]);
 
-
-  
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
-          <p className="text-sm text-gray-400">Loading....</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white px-6 py-10">
       <Navbar />
+
       {error && <p className="text-center text-red-500 mt-2">{error}</p>}
 
       <div className="mt-10">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="text-3xl sm:text-5xl font-bold text-center mb-8"
         >
           <GradientText
@@ -135,7 +123,7 @@ const Home = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="bg-white/10 mt-20 backdrop-blur-md border border-zinc-700 p-4 rounded-xl max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 items-center"
         >
           <div className="flex flex-col sm:flex-row w-full gap-4">
@@ -175,9 +163,18 @@ const Home = () => {
       </div>
 
       <div className="mt-8">
-        {hasSearched && jobLists.length > 0 && (
-          <JobLists showSearch={true} searchTerm={searchTerm} jobs={jobLists} />
-        )}
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center bg-black text-white">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
+              <p className="text-sm text-gray-400">Loading...</p>
+            </div>
+          </div>
+        }>
+          {hasSearched && !loading && (
+            <JobLists showSearch={true} searchTerm={searchTerm} jobs={filteredJobs.length > 0 ? filteredJobs : jobLists} />
+          )}
+        </Suspense>
       </div>
     </div>
   );

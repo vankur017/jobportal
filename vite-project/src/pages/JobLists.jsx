@@ -5,8 +5,10 @@ const JobLists = ({ jobs, showSearch, searchTerm}) => {
 
 
   return (
-    <div
-      className={`grid 
+    <div>
+    
+      <div
+       className={`grid 
         grid-cols-1 
         sm:grid-cols-2 
         md:grid-cols-3 
@@ -16,10 +18,11 @@ const JobLists = ({ jobs, showSearch, searchTerm}) => {
         gap-6 p-4 transition-all duration-300 ${
           showSearch ? 'pt-40' : ''
         } max-w-screen-2xl mx-auto`}
-    >
-      {jobs.map((job, index) => (
-        <JobCard key={index} job={job} searchTerm={searchTerm}  />
-      ))}
+      >
+        {jobs.map((job, index) => (
+          <JobCard key={index} job={job} searchTerm={searchTerm}  />
+        ))}
+      </div>
     </div>
   );
 };
