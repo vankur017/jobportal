@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 const navLinks = [
   { name: 'Home', path: '/home' },
   { name: 'About', path: '/about' },
-  { name: 'Profile', path: '/profile' },
+  // { name: 'Profile', path: '/profile' },
   { name: 'Logout', path: '/', isLogout: true }
 ];
 
@@ -109,7 +109,7 @@ const Navbar = () => {
 >
   {/* Header Section */}
   <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-    <h2 className="text-xl font-semibold text-indigo-300">Navigation</h2>
+    <h2 className="text-xl font-semibold text-indigo-300">Menu</h2>
     <motion.button
       whileTap={{ rotate: 90 }}
       onClick={() => setIsOpen(false)}
