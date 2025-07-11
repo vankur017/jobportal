@@ -23,13 +23,6 @@ A full-featured **Job Portal Web App** built with **React.js**, **Firebase**, an
 * **API:** RESTful APIs for profile management and job applications
 * **Deployment:** Firebase Hosting & Cloud Run
 
----
-
-## 📷 Screenshots
-
-| Profile Page                   | Applications Page                   |
-| ------------------------------ | ----------------------------------- |
-| ![Profile](link-to-screenshot) | ![Applications](link-to-screenshot) |
 
 ---
 
@@ -72,7 +65,6 @@ A full-featured **Job Portal Web App** built with **React.js**, **Firebase**, an
 
 ## ✅ Future Enhancements
 
-* 🔍 Job search and filtering
 * 📄 Resume upload and parsing
 * 📨 Email notifications for application updates
 * 📊 Dashboard analytics
