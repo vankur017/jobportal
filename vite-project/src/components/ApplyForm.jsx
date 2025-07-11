@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./Navbar";
-import { JOBAPI_URL } from "../constants/jobsapi";
+import { JOBAPI_URL } from "../constants/api";
 import SuccessModal from "./SuccessModal";  // Make sure this exists
 
 const ApplyForm = ({ selectedJob }) => {
@@ -35,57 +35,60 @@ const ApplyForm = ({ selectedJob }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setMessage("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  setMessage("");
 
-    if (!resumeFile) {
-      setMessage("Please select a resume file.");
-      setIsSubmitting(false);
-      return;
-    }
+  if (!resumeFile) {
+    setMessage("Please select a resume file.");
+    setIsSubmitting(false);
+    return;
+  }
 
-    try {
-      const base64File = await fileToBase64(resumeFile);
+  try {
+    const base64File = await fileToBase64(resumeFile);
 
-      const payload = {
-        ...formData,
-        resumeFile: base64File,
-        resumeFileName: resumeFile.name
-      };
+    const payload = {
+      ...formData,
+      resumeFile: base64File,
+      resumeFileName: resumeFile.name,
+      roleAppliedFor: selectedJob?.job_title || "",      
+      companyAppliedTo: selectedJob?.company_name || "", 
+      salaryOffered: selectedJob?.salary || ""
+    };
 
-      const response = await fetch(`${JOBAPI_URL}/apply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+    const response = await fetch(`${JOBAPI_URL}/apply`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      setMessage(`✅ Application for ${selectedJob?.job_title || "this role"} submitted successfully!`);
+      setFormData({
+        name: "",
+        mobile: "",
+        mailId: "",
+        currentCTC: "",
+        expectedCTC: "",
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage(`✅ Application for ${selectedJob.job_title} submitted successfully!`);
-        setFormData({
-          name: "",
-          mobile: "",
-          mailId: "",
-          currentCTC: "",
-          expectedCTC: ""
-        });
-        setResumeFile(null);
-        fileInputRef.current.value = "";
-        setShowForm(false);
-        setShowSuccess(true);
-      } else {
-        setMessage(result.error || "❌ Submission failed.");
-      }
-    } catch (error) {
-      console.error("❌ Error:", error);
-      setMessage("❌ Something went wrong.");
-    } finally {
-      setIsSubmitting(false);
+      setResumeFile(null);
+      fileInputRef.current.value = "";
+      setShowForm(false);
+      setShowSuccess(true);
+    } else {
+      setMessage(result.error || "❌ Submission failed.");
     }
-  };
+  } catch (error) {
+    console.error("❌ Error:", error);
+    setMessage("❌ Something went wrong.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white px-4 py-10">

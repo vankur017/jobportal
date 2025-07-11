@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { JOBAPI_URL } from '../constants/jobsapi';
+import { JOBAPI_URL } from '../constants/api';
 
 export const jobsQuery = async ({ role = '', location = '' }) => {
 

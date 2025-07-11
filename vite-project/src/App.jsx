@@ -5,10 +5,10 @@ import appStore from './utils/appStore';
 import Home from './pages/Home';
 import Logon from './pages/Logon';
 import JobList from './pages/JobCard';
-import Dashboard from './pages/Dashboard';
 import JobDetail from './pages/JobDetail'; 
 import ApplyJob from './pages/ApplyJob';
 import About from './pages/About';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (

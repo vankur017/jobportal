@@ -2,10 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import JobCard from '../pages/JobCard';
 import { motion } from 'framer-motion';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/config';
-import { getJobs } from '../utils/fetchjobs';
-import { JOBAPI_URL } from '../constants/jobsapi';
 import { jobsQuery } from '../utils/jobsQuery';
 import { addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
 

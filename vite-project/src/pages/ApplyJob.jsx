@@ -12,7 +12,7 @@ const ApplyJob = () => {
   const selectedJob = useSelector((state)=>state.job.selectedJob)
 
 
-  console.log(job);
+  // console.log(job);
    
    
   const [loading, setLoading] = useState(true); // Loader state

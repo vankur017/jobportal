@@ -1,4 +1,4 @@
-import { JOBAPI_URL } from '../constants/jobsapi';
+import { JOBAPI_URL } from '../constants/api';
 import axios from 'axios';
 
 export const jobById = async (id) => {

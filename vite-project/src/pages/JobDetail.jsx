@@ -14,7 +14,7 @@ const JobDetail = () => {
 
   const searchTerm = location.state.searchTerm
 
- console.log(searchTerm);
+//  console.log(searchTerm);
  
   
   

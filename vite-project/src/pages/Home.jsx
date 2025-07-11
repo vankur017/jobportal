@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { auth } from '../firebase/config';
 import { getJobs } from '../utils/fetchjobs';
-import { JOBAPI_URL } from '../constants/jobsapi';
+import { JOBAPI_URL } from '../constants/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { addFilteredJobs, addSuggetedJob } from '../utils/jobSlice';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { jobsQuery } from '../utils/jobsQuery';
 
 const JobLists = lazy(() => import('./JobLists'));
+
+const PAGE_SIZE = 12
 
 const Home = () => {
   const [error, setError] = useState('');
@@ -23,10 +25,13 @@ const Home = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0)
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const jobLists = useSelector((state) => state.job.jobs);
+
+  // console.log(auth.currentUser.uid)
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -83,6 +88,13 @@ const Home = () => {
     fetchJobsQuery();
   }, [searchTerm, dispatch]);
 
+  const noOfPages =Math.ceil(filteredJobs.length/PAGE_SIZE)
+  const start = currentPage*PAGE_SIZE
+  const end = (currentPage+1)*PAGE_SIZE
+
+  // console.log(noOfPages);
+
+
   const handleSearch = useCallback(() => {
     const trimmedRole = roleInput.trim();
     const trimmedLocation = locationInput.trim();
@@ -97,6 +109,10 @@ const Home = () => {
     setSearchTerm(`${trimmedRole}||${trimmedLocation}`);
     setHasSearched(true);
   }, [roleInput, locationInput, dispatch]);
+
+  const handleNextPageLoad = (n)=>{
+    setCurrentPage(n)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white px-6 py-10">
@@ -172,9 +188,29 @@ const Home = () => {
           </div>
         }>
           {hasSearched && !loading && (
-            <JobLists showSearch={true} searchTerm={searchTerm} jobs={filteredJobs.length > 0 ? filteredJobs : jobLists} />
+            <JobLists
+             showSearch={true}
+             searchTerm={searchTerm}
+             jobs={(filteredJobs.length > 0 ? filteredJobs : jobLists).slice(start, end)} />
           )}
         </Suspense>
+        <div className="flex justify-center mt-6 space-x-2">
+          {[...Array(noOfPages).keys()].map((n) => (
+            <button
+              key={n}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold ${
+                currentPage === n
+                  ? 'bg-gradient-to-r from-[#40ffaa] to-[#4079ff] text-black'
+                  : 'bg-zinc-800 text-white'
+              }`}
+              onClick={() => handleNextPageLoad(n)}
+            >
+              {n + 1}
+            </button>
+          ))}
+        </div>
+        
+
       </div>
     </div>
   );

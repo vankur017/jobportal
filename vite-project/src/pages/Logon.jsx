@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { checkValidData } from '../utils/validate'
 import FloatingRoles from '../components/FloatingRoles'
+import checkFirstSignIn from '../utils/checkFirstSignIn'
+import FirstSignIn from '../components/FirstSignIn'
+
+
 
 const Logon = () => {
   const [email, setEmail] = useState('')
@@ -14,61 +18,56 @@ const Logon = () => {
   const [isSignInForm, setForm] = useState(false)
   const [message, setMessage] = useState('')
   const [token, setToken] = useState('')
+  
 
 
   // useEffect(() => {
     
   // }, [])
   
-  const handleLogin = async (e) => {
-    e.preventDefault()
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+  setMessage("");
 
-    const storedToken = sessionStorage.getItem('token') 
-    if (storedToken) {
-      setToken(storedToken)
-      
-      navigate('/home') // Redirect to home if token exists
-    }
-    else{
-      setToken('')
-      
-      navigate('/') // Redirect to login if no token
-    }
-
-    const validationError = checkValidData(email, password)
-    if (validationError) {
-      setError(validationError)
-       return
-}
-
-    if(isSignInForm){
-      try {
-        await signInWithEmailAndPassword(auth, email, password)
-        setToken(auth.currentUser.accessToken)
-        sessionStorage.setItem('token', auth.currentUser.accessToken)
-        
-        navigate('/home')
-      } catch (err) {
-        setError('Invalid email or password. Please try again.')
-      }
-    }
-    else{
-      // Registration logic
-        await createUserWithEmailAndPassword(auth,email, password)
-        setMessage('Account created successfully! Please sign in.')
-        setEmail('')
-        setPassword('')
-       // Switch to sign-in form after successful registration
-        setForm(true)
-        setError('')
-        setTimeout(() => {
-          setMessage('')
-        }, 3000)
-        // Optionally, you can redirect to the sign-in page or show a success message
-     
-    }
-    
+  const validationError = checkValidData(email, password);
+  if (validationError) {
+    setError(validationError);
+    return;
   }
+
+  try {
+    if (isSignInForm) {
+      // 🔑 Sign in
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (user) {
+        const token = await user.getIdToken();
+        sessionStorage.setItem('token', token);
+
+        const profileExists = await checkFirstSignIn(user.uid);
+        if (!profileExists) {
+          navigate('/user/profile');  // No profile → go to first time profile
+        } else {
+          navigate('/home');          // Profile exists → go home
+        }
+      }
+    } else {
+      // 🆕 Sign up
+      await createUserWithEmailAndPassword(auth, email, password);
+      setMessage('Account created successfully! Please sign in.');
+      setEmail('');
+      setPassword('');
+      setForm(true);  // Switch to sign-in
+      setTimeout(() => setMessage(''), 3000);
+    }
+  } catch (err) {
+    console.error(err);
+    setError('Invalid credentials or user already exists.');
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-zinc-900 to-slate-900 text-white relative overflow-hidden">
@@ -224,7 +223,7 @@ const Logon = () => {
           transition={{ delay: 0.8 }}
           className="mt-8 text-center text-xs text-gray-400"
         >
-          <p>© 2024 Jobs Dekho. Find your dream job today.</p>
+          <p>© 2025 Jobs Dekho. Find your dream job today.</p>
         </motion.div>
       </div>
     </div>

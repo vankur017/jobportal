@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 const navLinks = [
   { name: 'Home', path: '/home' },
   { name: 'About', path: '/about' },
-  // { name: 'Profile', path: '/profile' },
+  { name: 'Profile', path: '/user/profile' },
   { name: 'Logout', path: '/', isLogout: true }
 ];
 
@@ -29,7 +29,7 @@ const Navbar = () => {
       setIsOpen(false);
       navigate('/');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Logout fail:', error);
     }
   };
 
