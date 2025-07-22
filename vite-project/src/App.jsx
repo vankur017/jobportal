@@ -9,13 +9,16 @@ import JobDetail from './pages/JobDetail';
 import ApplyJob from './pages/ApplyJob';
 import About from './pages/About';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Provider store={appStore}>
       <Routes>
         <Route path="/" element={<Logon />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<ProtectedRoute>
+                                            <Home />
+                                    </ProtectedRoute>} />
         <Route path="/jobs" element={<JobList />} />
         <Route path="/about" element={<About />} />
         <Route path="/user/profile" element={<Dashboard />} />

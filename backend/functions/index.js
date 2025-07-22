@@ -7,6 +7,10 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const mockDataRaw = require("./MOCK_DATA.json");
+const analyzeResumeHandler = require("./analyzeResume.js");
+
+require("dotenv").config();
+// const { setGlobalOptions } = require("firebase-functions/v2");
 
 // ✅ Set global deployment options (Region: asia-south1)
 setGlobalOptions({ region: 'asia-south1' });
@@ -22,10 +26,14 @@ const app = express();
 
 // ✅ Middleware
 app.use(cors());
-app.use(express.json());
+
+
 
 // ✅ Multer for file uploads (memory storage)
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+});
 
 // ✅ Prepare mock job data
 const mockData = mockDataRaw.map((job, index) => ({
@@ -34,6 +42,12 @@ const mockData = mockDataRaw.map((job, index) => ({
   image: `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name)}&background=random&rounded=true&size=256`,
 }));
 
+
+app.post("/analyze-resume-ai", ...analyzeResumeHandler(upload));
+
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/user/profile/:uid", async (req, res) => {
   const { uid } = req.params;
@@ -243,6 +257,67 @@ app.get("/user/profile/:uid", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch profile." });
   }
 });
+
+// // ✅ POST /analyze-resume-ai
+// app.post("/analyze-resume-ai", upload.single("resume"), async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No file uploaded" });
+//     }
+
+//     const pdfData = await pdfParse(req.file.buffer);
+//     const resumeText = pdfData.text;
+
+//     if (!resumeText || resumeText.trim().length < 50) {
+//       return res.status(400).json({ error: "Resume is empty or unparseable." });
+//     }
+
+//     const prompt = `
+// You are an AI resume reader.
+// Analyze the following resume and extract:
+// 1. Key skills
+// 2. Area of expertise
+// 3. 5 best-fit job roles
+
+// Resume:
+// ${resumeText}
+
+// Return your response in JSON like:
+// {
+//   "skills": [...],
+//   "suggested_jobs": [...]
+// }
+// `;
+
+//     const groqRes = await axios.post(
+//       "https://api.groq.com/openai/v1/chat/completions",
+//       {
+//         model: "llama3-8b-8192",
+//         messages: [{ role: "user", content: prompt }],
+//         temperature: 0.4,
+//       },
+//       {
+//         headers: {
+//         Authorization: `Bearer ${require('firebase-functions').config().groq.key}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     const aiContent = groqRes?.data?.choices?.[0]?.message?.content;
+
+//     if (!aiContent) {
+//       console.error("⚠️ No content returned from Groq", groqRes.data);
+//       return res.status(500).json({ error: "Groq returned empty or malformed response." });
+//     }
+
+//     return res.status(200).json({ suggestions: aiContent });
+//   } catch (error) {
+//     console.error("❌ Error analyzing resume:", error.response?.data || error.message || error);
+//     return res.status(500).json({ error: "Failed to analyze resume with AI" });
+//   }
+// });
+
 
 
 // ✅ Export API (asia-south1 region)

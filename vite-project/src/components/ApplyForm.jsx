@@ -5,6 +5,8 @@ import { JOBAPI_URL } from "../constants/api";
 import SuccessModal from "./SuccessModal";  // Make sure this exists
 
 const ApplyForm = ({ selectedJob }) => {
+  console.log(selectedJob);
+  
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",

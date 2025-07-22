@@ -19,7 +19,25 @@ const Logon = () => {
   const [message, setMessage] = useState('')
   const [token, setToken] = useState('')
   
+ 
+  useEffect(() => {
+    const user = auth.currentUser;
+    console.log(user);
+    
+    if (user) {
+      // ✅ Redirect immediately if already logged in
+      navigate("/home");
+    } else {
+      // ✅ Just in case Firebase hasn't initialized yet
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user) {
+          navigate("/home");
+        }
+      });
 
+      return () => unsubscribe();
+    }
+  }, [navigate]);
 
   // useEffect(() => {
     
@@ -50,7 +68,7 @@ const handleLogin = async (e) => {
         if (!profileExists) {
           navigate('/user/profile');  // No profile → go to first time profile
         } else {
-          navigate('/home');          // Profile exists → go home
+          navigate("/home");       // Profile exists → go home
         }
       }
     } else {
