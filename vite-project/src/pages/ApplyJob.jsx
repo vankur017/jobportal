@@ -2,38 +2,68 @@ import React, { useEffect, useState } from 'react';
 import ApplyForm from '../components/ApplyForm';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { jobById } from '../utils/jobById';
+
 
 const ApplyJob = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedJob = useSelector((state) => state.job.selectedJob);
-  const jobFromLocation = location?.state?.job;
-  console.log('Job from location:', jobFromLocation);
-  
 
-  console.log( 'Selected Job in ApplyJob', selectedJob,);
+  const reduxJob = useSelector((state) => state.job.selectedJob);
+  const locationJob = location?.state?.job || null;
 
-  const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState(reduxJob || locationJob || null);
+  const [loading, setLoading] = useState(false);
 
+  // Optional: You can uncomment this if you want login check
   // useEffect(() => {
   //   const token = sessionStorage.getItem('token');
-
-  //   setTimeout(() => {
-  //     if (!token) {
-  //       navigate('/');
-  //     } else {
-  //       setLoading(false);
-  //     }
-  //   }, 600);
+  //   if (!token) {
+  //     navigate('/');
+  //   }
   // }, [navigate]);
+
+    useEffect(() => {
+      const fetchJob = async () => {
+        if (reduxJob) {
+          setSelectedJob(reduxJob);
+          setLoading(false);
+          return;
+        }
+  
+        try {
+          const jobData = await jobById(id);
+          setLoading(true);
+          if (!jobData) {
+            console.warn('❌ Job not found in backend.');
+            setSelectedJob(null);
+          } else {
+            setSelectedJob(jobData);
+           
+          }
+        } catch (error) {
+          console.error('❌ Error fetching job:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchJob();
+    }, [id]);
+
+  useEffect(() => {
+    if (!reduxJob && locationJob) {
+      setSelectedJob(locationJob);
+    }
+  }, [reduxJob, locationJob]);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center">
           <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
-          <p className="text-sm text-gray-400">Loading....</p>
+          <p className="text-sm text-gray-400">Loading...</p>
         </div>
       </div>
     );

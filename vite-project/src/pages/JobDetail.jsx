@@ -6,28 +6,43 @@ import SuggestedJobs from '../components/SuggestedJobs';
 import { jobById } from '../utils/jobById';
 import { useDispatch } from 'react-redux';
 import { addSelectedJob } from '../utils/jobSlice';
+import { useSelector } from 'react-redux';
 
 const JobDetail = () => {
+  console.log('jobdetail');
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-
-  const searchTerm = location?.state?.searchTerm || ''; // ✅ Safe fallback
+  
+  const searchTerm = location?.state?.searchTerm || '';
+  const jobFromRedux = useSelector((state) => state.job.selectedJob);
 
   const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true); // ✅ Initial loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchJob = async () => {
+      if (jobFromRedux) {
+        setJob(jobFromRedux);
+        setLoading(false);
+        return;
+      }
+
       try {
         const jobData = await jobById(id);
-        setJob(jobData);
-      
+        if (!jobData) {
+          console.warn('❌ Job not found in backend.');
+          setJob(null);
+        } else {
+          setJob(jobData);
+         
+        }
       } catch (error) {
-        console.error('Error fetching job:', error);
+        console.error('❌ Error fetching job:', error);
       } finally {
-        setLoading(false); // ✅ Stop loading after fetch
+        setLoading(false);
       }
     };
 
@@ -35,11 +50,9 @@ const JobDetail = () => {
   }, [id]);
 
   const handleClick = () => {
-    navigate(`/job/apply/${id}`, 
-      {
-        job: job,
-      }
-    );
+    navigate(`/job/apply/${id}`, {
+      state: { job }, // pass fallback for apply page
+    });
   };
 
   if (loading) {
@@ -54,13 +67,13 @@ const JobDetail = () => {
   }
 
   if (!job) {
-    return <div className="text-center text-white mt-10">Job not found</div>;
+    return <div className="text-center text-white mt-10">❌ Job not found</div>;
   }
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center px-4 ">
+      <div className="min-h-screen bg-[#0f0f0f] text-white flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,7 +87,7 @@ const JobDetail = () => {
               className="w-20 h-20 rounded-full object-cover border-2 border-gray-700"
             />
             <div>
-              <h1 className="text-2xl font-bold text-white">{job.job_title}</h1>
+              <h1 className="text-2xl font-bold">{job.job_title}</h1>
               <p className="text-gray-400">{job.company_name}</p>
             </div>
           </div>
@@ -95,33 +108,35 @@ const JobDetail = () => {
               <p className="text-gray-400 leading-relaxed">{job.description}</p>
             </div>
 
-            <div>
-              <h2 className="text-lg font-semibold text-white mb-2">Tags</h2>
-              <div className="flex gap-2 flex-wrap">
-                {job.tags?.split(',').map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-[#2a2a2a] text-white text-xs font-medium px-3 py-1 rounded-full shadow-inner hover:bg-[#3b3b3b] transition"
-                  >
-                    {tag.trim()}
-                  </span>
-                ))}
+            {job.tags && (
+              <div>
+                <h2 className="text-lg font-semibold text-white mb-2">Tags</h2>
+                <div className="flex gap-2 flex-wrap">
+                  {job.tags.split(',').map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-[#2a2a2a] text-white text-xs font-medium px-3 py-1 rounded-full shadow-inner hover:bg-[#3b3b3b] transition"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="items-center justify-center flex mt-6">
-            <span
-              className="bg-amber-500 text-white px-4 py-1 rounded-full text-xs font-semibold inline-block mt-2 cursor-pointer"
+          <div className="flex justify-center mt-6">
+            <button
+              className="bg-amber-500 text-white px-4 py-1 rounded-full text-xs font-semibold mt-2 hover:bg-amber-600 transition"
               onClick={handleClick}
             >
               Apply
-            </span>
+            </button>
           </div>
         </motion.div>
       </div>
 
-      <div className='bg-[#0f0f0f] text-white flex items-center justify-center px-4 '>
+      <div className="bg-[#0f0f0f] text-white flex items-center justify-center px-4">
         <SuggestedJobs searchTerm={searchTerm} />
       </div>
     </>

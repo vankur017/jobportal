@@ -6,6 +6,8 @@ import SuccessModal from "./SuccessModal";
 import { useNavigate } from "react-router-dom";
 
 const ApplyForm = ({ selectedJob }) => {
+  console.log('applyform');
+  
   const navigate = useNavigate();
   console.log(selectedJob, 'Selected Job in ApplyForm');
   
@@ -26,11 +28,11 @@ const ApplyForm = ({ selectedJob }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   // 🛡 Redirect if selectedJob is undefined (e.g., refresh)
-  useEffect(() => {
-    if (!selectedJob) {
-      navigate("/home");
-    }
-  }, [selectedJob, navigate]);
+  // useEffect(() => {
+  //   if (!selectedJob) {
+  //     navigate("/home");
+  //   }
+  // }, [selectedJob, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -122,18 +124,40 @@ const ApplyForm = ({ selectedJob }) => {
                 transition={{ delay: 0.3, duration: 0.6, type: "spring" }}
                 className="bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-700"
               >
-                <div className="flex items-center space-x-4 mb-6">
-                  <img
-                    src={selectedJob?.image}
-                    alt="Company Logo"
-                    className="w-16 h-16 rounded-lg border border-gray-600 object-cover"
-                  />
-                  <div>
-                    <h1 className="text-xl font-bold">{selectedJob?.job_title}</h1>
-                    <p className="text-gray-400">{selectedJob?.company_name}</p>
-                    <p className="text-gray-400 text-sm">{selectedJob?.location}</p>
-                  </div>
+                <h1 className="text-3xl">{selectedJob.job_title}</h1>
+                
+          <div className="space-y-4 py-5 text-sm text-gray-300">
+            <div className="grid grid-cols-2 gap-4">
+              <Detail label="Location" value={selectedJob.location} />
+              <Detail label="Job Type" value={selectedJob.job_type} />
+              <Detail label="Posted On" value={selectedJob.posted_date} />
+              <Detail
+                label="Salary"
+                value={selectedJob.salary != null ? `₹${selectedJob.salary.toLocaleString()}` : 'Not Disclosed'}
+              />
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-white mb-2">Description</h2>
+              <p className="text-gray-400 leading-relaxed">{selectedJob.description}</p>
+            </div>
+
+            {selectedJob.tags && (
+              <div>
+                <h2 className="text-lg font-semibold text-white mb-2">Tags</h2>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedJob.tags.split(',').map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-[#2a2a2a] text-white text-xs font-medium px-3 py-1 rounded-full shadow-inner hover:bg-[#3b3b3b] transition"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
                 </div>
+              </div>
+            )}
+          </div>
                 <p className="text-gray-300 text-sm leading-relaxed">
                   Apply now to be part of {selectedJob?.company_name}'s team as a {selectedJob?.job_title} in {selectedJob?.location}.
                 </p>
@@ -208,5 +232,12 @@ const ApplyForm = ({ selectedJob }) => {
     </div>
   );
 };
+
+const Detail = ({ label, value }) => (
+  <div>
+    <p className="text-gray-500 uppercase text-xs">{label}</p>
+    <p className="text-white">{value}</p>
+  </div>
+);
 
 export default ApplyForm;
