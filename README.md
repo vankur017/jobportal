@@ -39,7 +39,7 @@ A full-featured **Job Portal Web App** built with **React.js**, **Firebase**, an
 
    ```bash
    cd vite-project
-   npm install
+   npm run dev
    ```
 
 3. **Set up Firebase:**
