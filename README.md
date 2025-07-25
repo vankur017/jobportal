@@ -86,7 +86,7 @@ uvicorn resume_analyzer:app --reload
 ### 4. Setup LM Studio for Local LLM
 
 1. **Download LM Studio:** https://lmstudio.ai
-2. **Load a Model** (e.g. Gemma 7B, Zephyr 7B)
+2. **Load a Model** i have used openchat_3.5 (e.g. Gemma 7B, Zephyr 7B)
 3. **Enable API Server:**
    - Go to ⚙️ Settings → Enable "OpenAI Compatible API"
    - Set server to run on `localhost:1234`
@@ -109,17 +109,5 @@ http://localhost:8000/analyze
 
 (Used in ResumeUpload → FastAPI → LM Studio → Filtered Jobs from Firebase Fucntions) 
 
----
-
-## ✅ Future Enhancements
-
-* 🧠 LLM fine-tuning for specific industry domains
-* 📨 Email notifications for application updates
-* 📊 Dashboard analytics
-* 🔍 Smart filtering based on resume content
 
 ---
-
-## 🙌 Contributions
-
-Feel free to fork the repo, create issues, or submit PRs. All contributions welcome!
