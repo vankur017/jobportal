@@ -1,56 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import SuggestedJobs from '../components/SuggestedJobs';
 import { jobById } from '../utils/jobById';
+import { useDispatch } from 'react-redux';
+import { addSelectedJob } from '../utils/jobSlice';
 
 const JobDetail = () => {
   const { id } = useParams();
-  // const jobs = useSelector((state) => state.job.jobs);
-  // const job = jobs.find((j) => String(j.id) === String(id));
-  const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-  const searchTerm = location.state.searchTerm
+  const searchTerm = location?.state?.searchTerm || ''; // ✅ Safe fallback
 
-//  console.log(searchTerm);
- 
-  
-  
   const [job, setJob] = useState(null);
-  
-  useEffect(()=>{
+  const [loading, setLoading] = useState(true); // ✅ Initial loading state
 
+  useEffect(() => {
     const fetchJob = async () => {
       try {
         const jobData = await jobById(id);
         setJob(jobData);
+      
       } catch (error) {
         console.error('Error fetching job:', error);
+      } finally {
+        setLoading(false); // ✅ Stop loading after fetch
       }
     };
 
     fetchJob();
+  }, [id]);
 
-  }, [id])
-
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = sessionStorage.getItem('token');
-
-    setTimeout(() => {
-      if (!token) {
-        navigate('/');
-      } else {
-        setLoading(false);
+  const handleClick = () => {
+    navigate(`/job/apply/${id}`, 
+      {
+        job: job,
       }
-    }, 600);
-  }, [navigate]);
+    );
+  };
 
-  if (loading || !job) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <div className="flex flex-col items-center">
@@ -64,10 +56,6 @@ const JobDetail = () => {
   if (!job) {
     return <div className="text-center text-white mt-10">Job not found</div>;
   }
-
-  const handleClick = () => {
-    navigate(`/job/apply/${id}`);
-  };
 
   return (
     <>
@@ -132,6 +120,7 @@ const JobDetail = () => {
           </div>
         </motion.div>
       </div>
+
       <div className='bg-[#0f0f0f] text-white flex items-center justify-center px-4 '>
         <SuggestedJobs searchTerm={searchTerm} />
       </div>
@@ -146,4 +135,4 @@ const Detail = ({ label, value }) => (
   </div>
 );
 
-export default JobDetail; 
+export default JobDetail;

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { checkValidData } from '../utils/validate'
 import FloatingRoles from '../components/FloatingRoles'
 import checkFirstSignIn from '../utils/checkFirstSignIn'
-import FirstSignIn from '../components/FirstSignIn'
+
 
 
 
@@ -20,24 +20,15 @@ const Logon = () => {
   const [token, setToken] = useState('')
   
  
-  useEffect(() => {
-    const user = auth.currentUser;
-    console.log(user);
-    
+ useEffect(() => {
+  const unsubscribe = auth.onAuthStateChanged((user) => {
     if (user) {
-      // ✅ Redirect immediately if already logged in
       navigate("/home");
-    } else {
-      // ✅ Just in case Firebase hasn't initialized yet
-      const unsubscribe = auth.onAuthStateChanged((user) => {
-        if (user) {
-          navigate("/home");
-        }
-      });
-
-      return () => unsubscribe();
     }
-  }, [navigate]);
+  });
+
+  return () => unsubscribe();
+}, [navigate]);
 
   // useEffect(() => {
     

@@ -1,12 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { JOBAPI_URL } from '../constants/api';
 
 const ResumeUpload = ({ onUploadSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState(null);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -15,7 +13,6 @@ const ResumeUpload = ({ onUploadSuccess }) => {
       setSuccess(false);
       return;
     }
-    console.log("Uploading file:", file, file instanceof File);
 
     const formData = new FormData();
     formData.append('resume', file);
@@ -24,8 +21,8 @@ const ResumeUpload = ({ onUploadSuccess }) => {
       setUploading(true);
       setMessage('Uploading...');
       setSuccess(false);
-      setAiSuggestions(null); // reset on new upload
 
+      // Upload to FastAPI server
       const res = await fetch(`http://localhost:8000/analyze`, {
         method: 'POST',
         body: formData,
@@ -35,32 +32,50 @@ const ResumeUpload = ({ onUploadSuccess }) => {
 
       const data = await res.json();
 
+      if (!data || (!data.suggested_jobs && !data.skills)) {
+        throw new Error('Invalid response from server');
+      }
+
+      // 🔁 Client-side: Fetch matched jobs using suggested roles
+      const matchedJobs = [];
+      for (const role of data.suggested_jobs || []) {
+        try {
+          const res = await fetch(
+            `https://api-am5r376q7a-el.a.run.app/jobs?role=${encodeURIComponent(role)}`
+          );
+          if (res.ok) {
+            const jobs = await res.json();
+            matchedJobs.push(...jobs);
+          }
+        } catch (err) {
+          console.warn(`Error fetching jobs for ${role}`, err);
+        }
+      }
+
+      // Remove duplicates
+      const uniqueJobs = Array.from(new Set(matchedJobs.map((job) => job.id))).map((id) =>
+        matchedJobs.find((job) => job.id === id)
+      );
+
+      const finalData = {
+        suggested_jobs: data?.suggested_jobs || [],
+        matched_jobs: uniqueJobs,
+        skills: data?.skills || [],
+      };
+
       setMessage('✅ Resume analyzed successfully');
       setSuccess(true);
 
-      // ✅ FIX: Declare parsed before inner try block
-      let parsed = data.suggestions;
-      try {
-        parsed = typeof parsed === 'string'
-          ? JSON.parse(parsed)
-          : parsed;
-      } catch (e) {
-        console.warn("AI response is not valid JSON:", e);
+      if (onUploadSuccess) {
+        onUploadSuccess(finalData);
       }
-
-      setAiSuggestions(parsed);
-
-    if (onUploadSuccess) {
-  const suggestedJobs = parsed?.suggested_jobs || [];
-  console.log("📤 Calling onUploadSuccess with:", suggestedJobs);
-  onUploadSuccess(suggestedJobs);
-}
     } catch (error) {
       console.error('Upload error:', error);
       setMessage('❌ Failed to upload or analyze resume');
       setSuccess(false);
     } finally {
       setUploading(false);
+      setMessage('')
     }
   }, [onUploadSuccess]);
 
@@ -75,7 +90,6 @@ const ResumeUpload = ({ onUploadSuccess }) => {
 
   return (
     <div className="text-white">
-      {/* Upload Box */}
       <div
         {...getRootProps()}
         className={`transition-all duration-300 border-2 border-dashed rounded-2xl p-8 md:p-10 text-center cursor-pointer
@@ -91,53 +105,11 @@ const ResumeUpload = ({ onUploadSuccess }) => {
             ? '📂 Drop your resume here'
             : '📄 Drag & drop or click to upload your resume'}
         </p>
-
-        {uploading && (
-          <p className="mt-3 text-blue-400 animate-pulse">Analyzing...</p>
-        )}
+        {uploading && <p className="mt-3 text-blue-400 animate-pulse">Analyzing...</p>}
         {message && (
-          <p
-            className={`mt-3 text-sm ${
-              success ? 'text-green-400' : 'text-red-400'
-            }`}
-          >
-            {message}
-          </p>
+          <p className={`mt-3 text-sm ${success ? 'text-green-400' : 'text-red-400'}`}>{message}</p>
         )}
       </div>
-
-      {/* AI Suggestions Below */}
-      {aiSuggestions && (
-        <div className="mt-6 bg-neutral-900 border border-neutral-700 rounded-2xl p-6">
-          <h3 className="text-xl font-semibold mb-4 text-white/90">🎯 AI Suggested Roles</h3>
-
-          {Array.isArray(aiSuggestions.suggested_jobs) ? (
-            <ul className="list-disc list-inside text-blue-300 mb-4">
-              {aiSuggestions.suggested_jobs.map((job, idx) => (
-                <li key={idx}>{job}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-blue-300">{aiSuggestions.suggested_jobs}</p>
-          )}
-
-          {Array.isArray(aiSuggestions.skills) && (
-            <>
-              <h4 className="text-lg font-semibold text-white/80 mt-4 mb-2">🧠 Extracted Skills:</h4>
-              <div className="flex flex-wrap gap-2">
-                {aiSuggestions.skills.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-blue-800/40 text-blue-200 text-sm rounded-full border border-blue-500"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 };

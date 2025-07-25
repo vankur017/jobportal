@@ -1,76 +1,53 @@
-import { MapPin, Briefcase } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { setSelectedJob } from '../utils/jobSlice'
-import ShinyText from '../components/ShinyText'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
+const JobCard = ({ job, searchTerm }) => {
+  const navigate = useNavigate();
 
-const JobCard = ({ job, searchTerm  }) => {
+  const handleClick = () => {
 
-  // const handleJobDetails = useSelector((state)=>state.job.jobs)
-  // console.log(handleJobDetails);
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
- const handleClick = () => {
-  dispatch(setSelectedJob(job)); 
-  navigate(`/job/${job.id}`, {
-    state: { searchTerm },
-  });
+    try{
+      // Navigate to the job details page with the job ID
 
-  // Delay scroll to allow the route to change
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 100); // 100ms delay works well
-};
+      console.log(job.id, 'Job ID clicked');
+      
+      navigate(`/job/${job.id}`, {
+      ...(searchTerm && { state: { searchTerm } }),
+    });
+
+    } catch (error) {
+      console.error('Navigation error:', error);  
+    }
+  };
+
   return (
-
-    <div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(99,102,241,0.2)' }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="w-full sm:w-[250px] md:w-[300px] lg:w-[320px] h-[280px] bg-white/5 border border-zinc-700 backdrop-blur-md rounded-2xl p-5 m-2 flex flex-col justify-between transition-all"
-        onClick={handleClick}
-      
-      >
-        <div className=" items-center gap-4">
-          <img
-            src={job.image}
-            alt={job.company_name}
-            className="w-14 h-14 rounded-xl object-cover border border-zinc-600"
-          />
-          <div>
-            <h3 className="text-lg font-semibold text-white line-clamp-1">{job.job_title}</h3>
-            <ShinyText className="text-sm text-zinc-400" text={job.company_name} />
-          </div>
+    <div
+      onClick={handleClick}
+      className="cursor-pointer bg-neutral-900 border border-neutral-700 rounded-xl p-4 hover:shadow-lg transition-shadow duration-300"
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <img src={job.image} alt={job.company_name} className="w-10 h-10 rounded-full" />
+        <div>
+          <p className="text-lg font-semibold text-white">{job.job_title}</p>
+          <p className="text-sm text-gray-400">{job.company_name} • {job.location}</p>
         </div>
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <MapPin size={16} className="text-indigo-400" />
-            <ShinyText text={job.location} disabled={false} speed={3} className='custom-class' />
-          </div>
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <Briefcase size={16} className="text-indigo-400" />
-            <span>{job.job_type}</span>
-          </div>
-        </div>
-        <div className="mt-4">
-          <motion.span
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            className="text-xs font-medium text-white bg-indigo-600 px-4 py-1 rounded-full inline-block"
+      </div>
+      <p className="text-gray-300 text-sm mb-2 line-clamp-3">{job.description}</p>
+      <div className="flex flex-wrap gap-2 mt-2">
+        {job.tags?.split(',')?.map((tag, idx) => (
+          <span
+            key={idx}
+            className="bg-blue-700 text-sm px-2 py-1 rounded-full text-white/90"
           >
-            {job.job_type}
-          </motion.span>
-        </div>
-       
-      </motion.div>
+            {tag.trim()}
+          </span>
+        ))}
+      </div>
+      <p className="text-sm text-gray-400 mt-3">
+        💰 {job.salary} • 🕐 {job.job_type}
+      </p>
     </div>
-  )
-}
+  );
+};
 
-export default JobCard
+export default JobCard;

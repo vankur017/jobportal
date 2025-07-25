@@ -96,7 +96,7 @@ const Dashboard = () => {
 
     if (user) fetchApplications();
   }, [user]);
-    console.log(applications);
+
     
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -135,7 +135,7 @@ const Dashboard = () => {
       </div>
     );
   }
-  console.log(formData);
+ 
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-6">

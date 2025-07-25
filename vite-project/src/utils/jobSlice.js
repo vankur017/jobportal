@@ -14,7 +14,7 @@ const jobSlice = createSlice({
     addFilteredJobs: (state, action) => {
       state.jobs = action.payload;     // update only the filtered view
     },
-    setSelectedJob: (state, action) => {
+    addSelectedJob: (state, action) => {
       state.selectedJob = action.payload;
      
     },
@@ -43,7 +43,7 @@ export const {
   
   addFilteredJobs,
   addSuggetedJob,
-  setSelectedJob,
+  addSelectedJob,
   removeJobs,
   setLoading,
   clearSuggestedJobs,

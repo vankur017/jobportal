@@ -42,8 +42,7 @@ const mockData = mockDataRaw.map((job, index) => ({
   image: `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name)}&background=random&rounded=true&size=256`,
 }));
 
-
-app.post("/analyze-resume-ai", ...analyzeResumeHandler(upload));
+app.post('/analyze-resume-ai', ...analyzeResumeHandler(upload));
 
 
 app.use(express.json());

@@ -32,12 +32,12 @@ const Home = () => {
   const navigate = useNavigate();
   const jobLists = useSelector((state) => state.job.jobs);
 
-  useEffect(() => {
-    window.history.pushState(null, "", window.location.href);
-    const handler = () => navigate("/home", { replace: true });
-    window.addEventListener("popstate", handler);
-    return () => window.removeEventListener("popstate", handler);
-  }, []);
+  // useEffect(() => {
+  //   window.history.pushState(null, "", window.location.href);
+  //   const handler = () => navigate("/home");
+  //   window.addEventListener("popstate", handler);
+  //   return () => window.removeEventListener("popstate", handler);
+  // }, []);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -46,7 +46,7 @@ const Home = () => {
       const unsubscribe = auth.onAuthStateChanged((user) => {
         if (user) navigate('/home');
       });
-      return () => unsubscribe();
+    
     }
   }, [navigate]);
 
@@ -130,39 +130,14 @@ const Home = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="mt-10 max-w-3xl mx-auto"
       >
-        <ResumeUpload
-  onUploadSuccess={async (aiJobs) => {
-    console.log("🚀 onUploadSuccess triggered with:", aiJobs);
-    setResumeUploaded(true);
-    setAiSuggestedJobs(aiJobs);
-
-    if (aiJobs && aiJobs.length > 0) {
-      try {
-        const allMatches = [];
-
-        for (let role of aiJobs) {
-          const query = encodeURIComponent(role);
-          const res = await fetch(`${JOBAPI_URL}/jobs?role=${query}`);
-          if (res.ok) {
-            const jobs = await res.json();
-            jobs.forEach(job => {
-              if (!allMatches.some(existing => existing.id === job.id)) {
-                allMatches.push(job);
-              }
-            });
-          }
-        }
-
-        setFilteredJobs(allMatches);
-        dispatch(addFilteredJobs(allMatches));
-        dispatch(addSuggetedJob(allMatches));
-      } catch (err) {
-        console.error("❌ Failed to fetch jobs for AI suggestions:", err);
-      }
-    }
-  }}
-/>
-
+      <ResumeUpload
+        onUploadSuccess={(data) => {
+          setResumeUploaded(true);
+          setAiSuggestedJobs(data?.suggested_jobs || []);
+          setFilteredJobs(data?.matched_jobs || []);
+          dispatch(addFilteredJobs(data?.matched_jobs || []));
+        }}
+      />
 
         {resumeUploaded && (
           <p className="text-green-400 text-center mt-4">
@@ -186,7 +161,7 @@ const Home = () => {
               animationSpeed={3}
               showBorder={false}
             >
-              Over 8,00,000 openings delivered perfectly
+              Over 3000 openings delivered perfectly
             </GradientText>
           </motion.h1>
 
@@ -288,23 +263,24 @@ const Home = () => {
 
         </Suspense>
 
-        {!resumeUploaded && (
-          <div className="flex justify-center mt-6 space-x-2">
-            {[...Array(noOfPages).keys()].map((n) => (
-              <button
-                key={n}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-                  currentPage === n
-                    ? 'bg-gradient-to-r from-[#40ffaa] to-[#4079ff] text-black'
-                    : 'bg-zinc-800 text-white'
-                }`}
-                onClick={() => handleNextPageLoad(n)}
-              >
-                {n + 1}
-              </button>
-            ))}
-          </div>
-        )}
+       {!resumeUploaded && (
+  <div className="flex flex-wrap justify-center mt-6 gap-2 px-4">
+    {[...Array(noOfPages).keys()].map((n) => (
+      <button
+        key={n}
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
+          currentPage === n
+            ? 'bg-gradient-to-r from-[#40ffaa] to-[#4079ff] text-black'
+            : 'bg-zinc-800 text-white hover:bg-zinc-700'
+        }`}
+        onClick={() => handleNextPageLoad(n)}
+      >
+        {n + 1}
+      </button>
+    ))}
+  </div>
+)}
+
       </div>
     </div>
   );

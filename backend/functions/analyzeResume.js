@@ -19,6 +19,8 @@ module.exports = (upload) => [
       });
 
       const aiSuggestions = response.data;
+      console.log(aiSuggestions);
+      
 
       // You can now match jobs using local /jobs route or mockData
       const mockData = require("./MOCK_DATA.json").map((job, index) => ({
